@@ -8,12 +8,11 @@ function move() {
 			   0.0,		1.0,		0.0,		0.0,
 			   0.0,		0.0,		1.0,		-5.0,
 			   0.0,		0.0,		0.0,		1.0];
-			   
+
 	// Rotate of 30 degrees on the y axis
-	// https://en.wikipedia.org/wiki/Rotation_matrix#Nested_dimensions
-	var R1 =  [Math.cos(toRad(30)),		0.0,		(-1)*Math.sin(toRad(30)),		0.0,
+	var R1 =  [Math.cos(toRad(30)),		0.0,		Math.sin(toRad(30)),		0.0,
 			   0.0,		1.0,		0.0,		0.0,
-		Math.sin(toRad(30)),		0.0,		Math.cos(toRad(30)),		0.0,
+		-Math.sin(toRad(30)),		0.0,		Math.cos(toRad(30)),		0.0,
 			   0.0,		0.0,		0.0,		1.0];
 			   
 	// Make the starship 2 times bigger
