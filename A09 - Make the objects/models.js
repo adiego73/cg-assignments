@@ -87,20 +87,49 @@ var indexedPrimitives = {
         return {'vertices': vert, 'index': ind};
     },
     'sphere': function () {
-        var vert = [[0.0, 0.0, 0.0]];
+        var vert = [[0, 0, 1]];
+        var vertTop = [];
+        var vertMiddle = [];
+        var vertBottom = [];
         var ind = [];
-        var slices = 5;
-        for (var i = 0; i < slices; i++) {
-            vert[i + 1] = [Math.sin(2 * Math.PI / slices * i), -Math.cos(2 * Math.PI / slices * i), i*(-0.5)];
-            vert[i + slices + 1] = [2.6 * Math.sin(2 * Math.PI / slices * (i + 0.5)), -2.6 * Math.cos(2 * Math.PI / slices * (i + 0.5)), i*(-0.5)];
-            ind[6 * i] = 0;
 
-            ind[6 * i + 1] = i + 1;
-            ind[6 * i + 2] = (i < slices - 1) ? i + 2 : 1;
-            ind[6 * i + 4] = i + 1;
-            ind[6 * i + 3] = (i < slices - 1) ? i + 2 : 1;
-            ind[6 * i + 5] = slices + i + 1;
+        var slices = 6;
+        // top part -> the top point and all the triangles connecting to it.
+        for (var t = 0; t < slices; t++) {
+            vertTop.push([Math.cos(2 * Math.PI / slices * t), Math.sin(2 * Math.PI / slices * t), 0.5]);
         }
+        // doing the indexes: 0 -> the top point, then the indexes of the triangles
+        ind.push(0,1,2, 0,2,3, 0,3,4, 0,4,5, 0,5,6, 0,6,1);
+
+        // middle part: the hexagon is 15% scaled w.r.t the previous one
+        for (var m1 = 0; m1 < slices; m1++) {
+            vertMiddle.push([Math.cos(2 * Math.PI / slices * m1) * 1.15, Math.sin(2 * Math.PI / slices * m1) * 1.15, 0]);
+        }
+        // adding indexes for each face of the middle top face.
+        ind.push(8,2,1, 1,7,8,
+                 3,2,8, 8,9,3,
+                 3,9,10, 10,4,3,
+                 4,10,11, 11,5,4,
+                 5,11,12, 12,6,5,
+                 7,1,6, 6,12,7);
+
+        // bottom part: the hexagon is the same as the first one.
+        for (var b = 0; b < slices; b++) {
+            vertBottom.push([Math.cos(2 * Math.PI / slices * b), Math.sin(2 * Math.PI / slices * b), -0.5]);
+        }
+        // adding indexes for each face of the middle bottom face.
+        ind.push(14,8,7, 7,13,14,
+            9,8,14, 14,15,9,
+            9,15,16, 16,10,9,
+            10,16,17, 17,11,10,
+            11,17,18, 18,12,11,
+            13,7,12, 12,18,13);
+
+        // bottom part
+        ind.push(19,14,13, 19,15,14, 19,16,15, 19,17,16, 19,18,17, 19,13,18);
+
+        vert = vert.concat(vertTop).concat(vertMiddle).concat(vertBottom);
+        vert.push([0.0, 0.0, -1]);
 
         return {'vertices': vert, 'index': ind};
     }
