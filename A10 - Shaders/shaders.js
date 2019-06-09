@@ -76,7 +76,7 @@ var S3 = `
 	
 	vec4 ambient = ambientLightColor * ambColor;
 	
-	out_color = clamp(ambient + lambert_diffuse + phong_specular + emit, 0.0, 1.0); // should add + emit to add the emission light
+	out_color = clamp(ambient + lambert_diffuse + phong_specular + emit, 0.0, 1.0);
 `;
 
 // Single spot light (with decay), Lambert diffuse, Blinn specular, no ambient and no emission
@@ -99,7 +99,23 @@ var S4 = `
 
 // Single directional light, Cartoon diffuse, Cartoon specular, no ambient but emission
 var S5 = `
-	out_color = vec4(1.0, 0.0, 1.0, 1.0);
+	vec3 reflection = 2.0 * dot(normalVec, LADir) * normalVec - LADir;
+	vec4 cartoon_specular_color = specularColor;
+	vec4 cartoon_diffuse_color = diffColor;
+	
+	if(dot(reflection, eyedirVec) <= SToonTh){
+		cartoon_specular_color = vec4(0.0, 0.0, 0.0, 1.0);
+	}
+	
+	vec4 cartoon_specular = LAlightColor * cartoon_specular_color;
+	
+	if(dot(LADir, normalVec) <= DToonTh){
+		cartoon_diffuse_color = vec4(0.0, 0.0, 0.0, 1.0);
+	}
+	
+	vec4 cartoon_diffuse = LAlightColor * cartoon_diffuse_color;
+	
+	out_color = clamp(cartoon_diffuse + cartoon_specular + emit, 0.0, 1.0);
 `;
 
 // Single directional light, no diffuse, phong specular, hemispheric ambient and no emission
