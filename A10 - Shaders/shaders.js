@@ -36,8 +36,8 @@ function shaders() {
 //float SToonTh;				// Threshold for specular in a toon shader
 //
 //vec4 diffColor;				// diffuse color
-//vec4 ambColor;				// material ambient color
-//vec4 specularColor;			// specular color
+//vec4 ambColor;				// material ambient color -> ambient ligth reflection color: m_a
+//vec4 specularColor;			// specular color --> m_s
 //vec4 emit;					// emitted color
 //	
 //vec3 normalVec;				// direction of the normal vecotr to the surface
@@ -59,14 +59,22 @@ var S2 = `
 	vec4 lambert_diffuse = LAlightColor * decay * diffColor * clamp(dot(LADir, normalVec), 0.0, 1.0);
 	
 	vec3 halfVec = normalize(LADir + eyedirVec);
-	vec4 blinn_specular = LAlightColor * specularColor * pow(clamp(dot(normalVec, halfVec), 0.0, 1.0), SpecShine);
+	vec4 blinn_specular = LAlightColor * specularColor * pow(clamp(dot(halfVec, normalVec), 0.0, 1.0), SpecShine);
 	
 	out_color = lambert_diffuse + blinn_specular;
 `;
 
 // Single directional light, Lambert diffuse, Phong specular, constant ambient and emission
 var S3 = `
-	out_color = vec4(1.0, 1.0, 0.0, 1.0);
+	float decay = pow(LATarget / length(LAPos - fs_pos), LADecay); // without decay should be 1.0
+	vec4 lambert_diffuse = LAlightColor * decay * diffColor * clamp(dot(normalVec, LADir), 0.0, 1.0);
+	
+	vec3 reflection = 2.0 * dot(normalVec, LADir) * normalVec - LADir;
+	vec4 phong_specular = LAlightColor * specularColor * pow(clamp(dot(reflection, eyedirVec), 0.0, 1.0), SpecShine);
+	
+	vec4 ambient = ambientLightColor * ambColor;
+	
+	out_color = clamp(lambert_diffuse + phong_specular + ambient, 0.0, 1.0); // should add + emit, to add the emission light
 `;
 
 // Single spot light (with decay), Lambert diffuse, Blinn specular, no ambient and no emission
