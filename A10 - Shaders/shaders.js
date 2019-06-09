@@ -120,7 +120,12 @@ var S5 = `
 
 // Single directional light, no diffuse, phong specular, hemispheric ambient and no emission
 var S6 = `
-	out_color = vec4(0.0, 1.0, 1.0, 1.0);
+	vec3 reflection = 2.0 * dot(normalVec, LADir) * normalVec - LADir;
+	vec4 phong_specular = LAlightColor * specularColor * pow(clamp(dot(reflection, eyedirVec), 0.0, 1.0), SpecShine);
+	
+	vec4 ambient = ambColor * ( ambientLightColor * ((dot(normalVec, ADir) + 1.0) / 2.0) + ( (1.0 - dot(normalVec, ADir)) / 2.0 ) * ambientLightLowColor);
+
+	out_color = clamp(phong_specular + ambient, 0.0, 1.0);
 `;
 
 // Three lights: a directional, a point and a spot. Lambert diffuse, phong specular, constant ambient and no emission
