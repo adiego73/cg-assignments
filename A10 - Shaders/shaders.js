@@ -1,5 +1,5 @@
 function shaders() {
-// The shader can find the required informations in the following variables:
+// The shader can find the required information in the following variables:
 
 //vec3 fs_pos;			// Position of the point in 3D space
 //
@@ -41,7 +41,7 @@ function shaders() {
 //vec4 emit;					// emitted color
 //	
 //vec3 normalVec;				// direction of the normal vecotr to the surface
-//vec3 eyedirVec;				// looking direction
+//vec3 eyedirVec;				// looking direction -> omega_r
 //
 //
 // Final color is returned into:
@@ -49,12 +49,19 @@ function shaders() {
 
 // Single directional light, Lambert diffuse only: no specular, no ambient, no emission
 var S1 = `
-	out_color = vec4(1.0, 0.0, 0.0, 1.0);
+	float decay = 1.0;
+	out_color = LAlightColor * decay * diffColor * clamp(dot(LADir, normalVec), 0.0, 1.0);
 `;
 
 // Single point light with decay, Lambert diffuse, Blinn specular, no ambient and no emission
 var S2 = `
-	out_color = vec4(0.0, 1.0, 0.0, 1.0);
+	float decay = pow(LATarget / length(LAPos - fs_pos), LADecay);
+	vec4 lambert_diffuse = LAlightColor * decay * diffColor * clamp(dot(LADir, normalVec), 0.0, 1.0);
+	
+	vec3 halfVec = normalize(LADir + eyedirVec);
+	vec4 blinn_specular = LAlightColor * specularColor * pow(clamp(dot(normalVec, halfVec), 0.0, 1.0), SpecShine);
+	
+	out_color = lambert_diffuse + blinn_specular;
 `;
 
 // Single directional light, Lambert diffuse, Phong specular, constant ambient and emission
